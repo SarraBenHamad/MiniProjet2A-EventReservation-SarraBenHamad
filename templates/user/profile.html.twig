@@ -1,0 +1,148 @@
+{% extends 'user/base.html.twig' %}
+{% block title %}My Profile | EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center g-4">
+        <div class="col-md-8 col-lg-6">
+            
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ path('home') }}" class="text-decoration-none text-muted">Home</a></li>
+                    <li class="breadcrumb-item active fw-bold text-primary" aria-current="page">Account Settings</li>
+                </ol>
+            </nav>
+
+            <div class="card border-0 shadow-lg rounded-4 mb-4 overflow-hidden">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex flex-column flex-sm-row align-items-center text-center text-sm-start mb-4">
+                        <div class="position-relative mb-3 mb-sm-0 me-sm-4">
+                            <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+                                 style="width: 85px; height: 85px; border: 2px solid #fff;">
+                                <i class="bi bi-person-fill text-primary display-6"></i>
+                            </div>
+                            <span class="position-absolute bottom-0 end-0 bg-success border border-white border-2 rounded-circle p-2" title="Online"></span>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold text-dark mb-1">{{ app.user.username }}</h3>
+                            <p class="text-muted mb-0"><i class="bi bi-envelope me-2"></i>{{ app.user.email }}</p>
+                            <span class="badge bg-indigo-soft text-primary mt-2 px-3 py-2 rounded-pill small fw-bold">Verified Member</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 pt-3 border-top">
+                        <a href="{{ path('home') }}" class="btn btn-light border btn-sm rounded-pill px-3">
+                            <i class="bi bi-search me-1"></i> Browse Events
+                        </a>
+                        <a href="{{ path('user_logout') }}" class="btn btn-outline-danger btn-sm rounded-pill px-3 ms-auto">
+                            <i class="bi bi-power me-1"></i> Sign Out
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold text-dark d-flex align-items-center mb-0">
+                        <span class="bg-dark text-white rounded-circle p-2 me-3 d-flex shadow-sm" style="width: 32px; height: 32px;">
+                            <i class="bi bi-shield-lock-fill" style="font-size: 0.9rem;"></i>
+                        </span>
+                        Security & Access
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="bg-light p-4 rounded-4 mb-4 border-start border-primary border-4">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-fingerprint fs-2 text-primary me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Biometric Authentication</h6>
+                                <p class="text-muted small mb-0">
+                                    Secure your account using Touch ID, Face ID, or Windows Hello. 
+                                    Skip the password and login instantly.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="statusMsg" class="mb-3"></div>
+
+                    <button id="addPasskeyBtn" class="btn btn-dark btn-lg w-100 rounded-3 shadow-sm py-3 transition-all">
+                        <i class="bi bi-plus-circle me-2"></i> Register New Passkey
+                    </button>
+
+                    <div class="mt-4 p-3 bg-white border rounded-3 d-flex align-items-center gap-3">
+                        <div class="text-primary fs-4">
+                            <i class="bi bi-info-circle-fill"></i>
+                        </div>
+                        <p class="x-small text-muted mb-0">
+                            <strong>Note:</strong> Passkeys are hardware-bound. We recommend adding a passkey for each 
+                            trusted device you use to access <strong>EventHub</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    body { background-color: #f1f5f9; }
+    .bg-indigo-soft { background-color: rgba(99, 102, 241, 0.1); }
+    .x-small { font-size: 0.78rem; line-height: 1.4; }
+    .transition-all { transition: all 0.2s ease-in-out; }
+    .btn-dark:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important; }
+    .breadcrumb-item { font-size: 0.85rem; }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="/js/auth.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('addPasskeyBtn');
+    const statusMsg = document.getElementById('statusMsg');
+
+    if (!window.PublicKeyCredential) {
+        btn.disabled = true;
+        btn.className = 'btn btn-light w-100 rounded-3 text-muted';
+        btn.innerHTML = '<i class="bi bi-slash-circle me-2"></i>Browser Not Supported';
+        return;
+    }
+
+    btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Waiting for Device...';
+        statusMsg.innerHTML = '';
+
+        try {
+            const email = '{{ app.user.email }}';
+            const username = '{{ app.user.username }}';
+            await registerPasskey(email, username);
+
+            statusMsg.innerHTML = `
+                <div class="alert alert-success border-0 shadow-sm rounded-3 animate-fade-in d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+                    <div>
+                        <strong class="d-block">Success!</strong>
+                        <span class="small">Your passkey is now active for this device.</span>
+                    </div>
+                </div>`;
+
+            btn.className = 'btn btn-success btn-lg w-100 rounded-3 py-3';
+            btn.innerHTML = '<i class="bi bi-shield-check me-2"></i>Passkey Registered';
+
+        } catch (e) {
+            statusMsg.innerHTML = `
+                <div class="alert alert-danger border-0 shadow-sm rounded-3">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Registration Failed:</strong> ${e.message}
+                </div>`;
+            btn.disabled = false;
+            btn.className = 'btn btn-dark btn-lg w-100 rounded-3 py-3';
+            btn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Try Again';
+        }
+    });
+});
+</script>
+{% endblock %}

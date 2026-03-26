@@ -1,0 +1,139 @@
+{% extends 'user/base.html.twig' %}
+{% block title %}Login | EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4">
+            <div class="card border-0 shadow-lg rounded-4 p-4 overflow-hidden">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-circle mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-person-circle text-primary fs-3"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark">Welcome Back</h3>
+                    <p class="text-muted small">Login to manage your event reservations</p>
+                </div>
+
+                {% if error %}
+                    <div class="alert alert-danger border-0 rounded-3 small d-flex align-items-center mb-4">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div>{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                    </div>
+                {% endif %}
+
+                <form method="post" action="{{ path('user_login') }}">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                            <input type="email" name="_username" class="form-control border-start-0 ps-0" 
+                                   placeholder="name@example.com" value="{{ last_username }}" required autofocus>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-shield-lock"></i></span>
+                            <input type="password" name="_password" class="form-control border-start-0 ps-0" 
+                                   placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-3 shadow-sm mb-3" style="font-size: 0.95rem;">
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="position-relative my-4">
+                    <hr class="text-muted opacity-25">
+                    <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 small text-muted">SECURE ACCESS</span>
+                </div>
+
+                <button id="passkeyLoginBtn" class="btn btn-outline-indigo w-100 rounded-3 py-2 d-flex align-items-center justify-content-center">
+                    <i class="bi bi-fingerprint fs-5 me-2"></i>
+                    <span>Login with Passkey</span>
+                </button>
+
+                <div class="text-center mt-4">
+                    <p class="small text-muted mb-0">
+                        Don't have an account? 
+                        <a href="{{ path('user_register') }}" class="text-primary fw-bold text-decoration-none">Register here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body { background-color: #f8fafc; }
+    .card { background: #ffffff; }
+    .form-control { padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
+    .form-control:focus { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
+    .input-group-text { border: 1px solid #e2e8f0; border-radius: 8px 0 0 8px; font-size: 0.9rem; }
+    .btn-primary { background: #6366f1; border: none; transition: all 0.2s; }
+    .btn-primary:hover { background: #4f46e5; transform: translateY(-1px); }
+    
+    .btn-outline-indigo { 
+        color: #6366f1; 
+        border: 1px solid #6366f1; 
+        background: transparent;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .btn-outline-indigo:hover { 
+        background: #6366f1; 
+        color: white; 
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="/js/auth.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('passkeyLoginBtn');
+
+    if (!window.PublicKeyCredential) {
+        btn.disabled = true;
+        btn.classList.add('opacity-50');
+        btn.innerHTML = '<i class="bi bi-x-circle me-2"></i>Passkey not supported';
+        return;
+    }
+
+    btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Authenticating...';
+        
+        try {
+            const result = await loginWithPasskey();
+
+            if (result.token && result.user) {
+                const sessionRes = await fetch('/passkey-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: result.user.email })
+                });
+
+                if (sessionRes.ok) {
+                    window.location.href = '/';
+                } else {
+                    throw new Error('Session creation failed');
+                }
+            }
+        } catch (e) {
+            btn.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Failed - Try Again';
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }, 3000);
+        }
+    });
+});
+</script>
+{% endblock %}

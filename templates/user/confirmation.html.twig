@@ -1,0 +1,113 @@
+{% extends 'user/base.html.twig' %}
+
+{% block title %}Reservation Confirmed! | EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden animate-bounce-in">
+                <div class="card-body p-0">
+                    <div class="bg-success bg-opacity-10 text-center py-5">
+                        <div class="success-icon-wrapper mb-3">
+                            <i class="bi bi-check-circle-fill text-success display-1"></i>
+                        </div>
+                        <h2 class="fw-bold text-dark mb-1">You're going!</h2>
+                        <p class="text-muted mb-0 px-4">A confirmation email has been sent to <span class="text-dark fw-semibold">{{ reservation.email }}</span></p>
+                    </div>
+
+                    <div class="p-4 p-md-5">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="flex-grow-1">
+                                <h5 class="fw-bold mb-0 text-uppercase tracking-widest text-primary small">Event Ticket</h5>
+                                <h3 class="fw-bold text-dark mt-1">{{ event.title }}</h3>
+                            </div>
+                            <div class="text-end d-none d-sm-block">
+                                <i class="bi bi-qr-code text-muted fs-1 opacity-25"></i>
+                            </div>
+                        </div>
+
+                        <div class="row g-4 border-top border-bottom py-4 my-2">
+                            <div class="col-6">
+                                <label class="text-muted small text-uppercase fw-bold">Attendee</label>
+                                <p class="mb-0 fw-semibold">{{ reservation.name }}</p>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small text-uppercase fw-bold">Date & Time</label>
+                                <p class="mb-0 fw-semibold">{{ event.date|date('d M Y') }} at {{ event.date|date('H:i') }}</p>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small text-uppercase fw-bold">Venue</label>
+                                <p class="mb-0 fw-semibold"><i class="bi bi-geo-alt-fill text-danger me-1 small"></i>{{ event.location }}</p>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small text-uppercase fw-bold">Ticket ID</label>
+                                <p class="mb-0 font-monospace text-muted small">#{{ reservation.id|default('000' ~ loop.index|default('1')) }}</p>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-3 mt-5">
+                            <a href="{{ path('home') }}" class="btn btn-primary btn-lg rounded-3 shadow-sm py-3">
+                                <i class="bi bi-house-door me-2"></i> Browse More Events
+                            </a>
+                            <div class="text-center">
+                                <button onclick="window.print()" class="btn btn-link text-decoration-none text-muted small">
+                                    <i class="bi bi-printer me-1"></i> Print Confirmation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4 animate-fade-up">
+                <p class="text-muted small">
+                    Something came up? You can manage your reservations in your 
+                    <a href="{{ path('user_profile') }}" class="text-primary fw-bold text-decoration-none">Profile Settings</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .animate-bounce-in {
+        animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .animate-fade-up {
+        animation: fadeUp 1s ease forwards;
+        opacity: 0;
+    }
+
+    @keyframes bounceIn {
+        0% { opacity: 0; transform: scale(0.3); }
+        50% { opacity: 1; transform: scale(1.05); }
+        70% { transform: scale(0.9); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tracking-widest { letter-spacing: 0.15em; }
+    
+    .success-icon-wrapper {
+        animation: checkmarkScale 0.5s ease-in-out 0.4s both;
+    }
+
+    @keyframes checkmarkScale {
+        0% { transform: scale(0); }
+        100% { transform: scale(1); }
+    }
+
+    /* Print styling to hide the background and buttons */
+    @media print {
+        .btn, footer, nav, .text-muted.small { display: none !important; }
+        .card { box-shadow: none !important; border: 1px solid #ddd !important; }
+        .bg-success-soft { background-color: transparent !important; }
+    }
+</style>
+{% endblock %}

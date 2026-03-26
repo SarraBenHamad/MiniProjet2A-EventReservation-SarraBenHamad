@@ -1,0 +1,139 @@
+{% extends 'user/base.html.twig' %}
+{% block title %}Create Account | EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4">
+            <div class="card border-0 shadow-lg rounded-4 p-4 overflow-hidden">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-indigo-soft rounded-circle mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-person-plus text-primary fs-3"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark">Join EventHub</h3>
+                    <p class="text-muted small">Create an account to start booking events</p>
+                </div>
+
+                <form method="post" id="registerForm">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-at"></i></span>
+                            <input type="text" name="username" class="form-control border-start-0 ps-0" 
+                                   placeholder="johndoe" required autofocus>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                            <input type="email" name="email" class="form-control border-start-0 ps-0" 
+                                   placeholder="name@example.com" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Password</label>
+                        <div class="input-group mb-1">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-key"></i></span>
+                            <input type="password" name="password" id="passwordInput" class="form-control border-start-0 ps-0" 
+                                   placeholder="Min. 6 characters" minlength="6" required>
+                        </div>
+                        <div class="progress mt-2" style="height: 4px;">
+                            <div id="pw-strength" class="progress-bar bg-light" role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-3 shadow-sm mb-3">
+                        Create Account
+                    </button>
+                </form>
+
+                <div id="passkeySection" style="display:none" class="animate-fade-in">
+                    <div class="position-relative my-4">
+                        <hr class="text-muted opacity-25">
+                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 small text-muted text-uppercase tracking-wider">Secure Step</span>
+                    </div>
+
+                    <div class="bg-light p-3 rounded-3 mb-3 text-center">
+                        <p class="small text-muted mb-3">Enhance your security with biometric login.</p>
+                        <button id="registerPasskeyBtn" class="btn btn-outline-indigo w-100 rounded-3 d-flex align-items-center justify-content-center">
+                            <i class="bi bi-fingerprint fs-5 me-2"></i>
+                            <span>Add Passkey</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="small text-muted mb-0">
+                        Already have an account? 
+                        <a href="{{ path('user_login') }}" class="text-primary fw-bold text-decoration-none">Sign In</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body { background-color: #f8fafc; }
+    .bg-indigo-soft { background-color: rgba(99, 102, 241, 0.1); }
+    .form-control { padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.95rem; }
+    .form-control:focus { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
+    .input-group-text { border: 1px solid #e2e8f0; border-radius: 8px 0 0 8px; }
+    
+    .btn-primary { background: #6366f1; border: none; font-weight: 600; }
+    .btn-primary:hover { background: #4f46e5; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2); }
+    
+    .btn-outline-indigo { color: #6366f1; border: 1px solid #6366f1; font-weight: 500; }
+    .btn-outline-indigo:hover { background: #6366f1; color: white; }
+
+    .animate-fade-in { animation: fadeIn 0.5s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .tracking-wider { letter-spacing: 0.05em; font-size: 0.65rem; font-weight: 800; }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="/js/auth.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const pwInput = document.getElementById('passwordInput');
+    const pwBar = document.getElementById('pw-strength');
+
+    // Visual password strength indicator
+    pwInput.addEventListener('input', () => {
+        const val = pwInput.value;
+        let strength = Math.min((val.length / 10) * 100, 100);
+        pwBar.style.width = strength + '%';
+        
+        if (strength < 40) pwBar.className = 'progress-bar bg-danger';
+        else if (strength < 70) pwBar.className = 'progress-bar bg-warning';
+        else pwBar.className = 'progress-bar bg-success';
+    });
+
+    document.getElementById('registerPasskeyBtn')?.addEventListener('click', async () => {
+        const email = document.querySelector('input[name="email"]').value;
+        const btn = document.getElementById('registerPasskeyBtn');
+        
+        if (!email) { alert('Please fill in your email first'); return; }
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating...';
+
+        try {
+            await registerPasskey(email, email);
+            btn.className = 'btn btn-success w-100 rounded-3';
+            btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Passkey Ready!';
+            setTimeout(() => { window.location.href = '{{ path("user_login") }}'; }, 1500);
+        } catch (e) {
+            alert('Failed: ' + e.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-fingerprint me-2"></i>Add Passkey';
+        }
+    });
+});
+</script>
+{% endblock %}
