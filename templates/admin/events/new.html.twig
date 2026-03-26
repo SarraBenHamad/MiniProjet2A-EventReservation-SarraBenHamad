@@ -1,0 +1,125 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}New Event | EventAdmin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Create New Event</h2>
+            <p class="text-muted small">Fill in the details below to publish a new event to the platform.</p>
+        </div>
+        <a href="{{ path('admin_events_index') }}" class="btn btn-white shadow-sm border-0 px-3">
+            <i class="bi bi-arrow-left me-2"></i> Back to List
+        </a>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="card-title fw-bold mb-4">
+                            <i class="bi bi-info-circle text-primary me-2"></i>General Information
+                        </h5>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Event Title <span class="text-danger">*</span></label>
+                            <input type="text" name="title" class="form-control form-control-lg" 
+                                   placeholder="e.g. Symfony Workshop 2026" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+                            <textarea name="description" class="form-control" rows="6" 
+                                      placeholder="Provide a detailed overview of the event..." required></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-semibold">Date & Time <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-calendar-event"></i></span>
+                                    <input type="datetime-local" name="date" class="form-control border-start-0" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-semibold">Available Seats <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-people"></i></span>
+                                    <input type="number" name="seats" class="form-control border-start-0" min="1" placeholder="100" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-0">
+                            <label class="form-label fw-semibold">Location <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-geo-alt"></i></span>
+                                <input type="text" name="location" class="form-control border-start-0" 
+                                       placeholder="e.g. Sousse, Tunisia" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="card-title fw-bold mb-4">
+                            <i class="bi bi-image text-primary me-2"></i>Event Media
+                        </h5>
+                        
+                        <div class="image-upload-wrapper text-center border border-2 border-dashed rounded-4 p-4 mb-3">
+                            <div id="upload-placeholder">
+                                <i class="bi bi-cloud-arrow-up display-4 text-muted"></i>
+                                <p class="small text-muted mt-2">Click to upload or drag and drop an event banner</p>
+                            </div>
+                            <img id="preview" src="" class="img-fluid rounded-3 d-none shadow-sm">
+                            <input type="file" name="image" id="imageInput" class="form-control mt-3" accept="image/*">
+                        </div>
+                        <p class="text-muted x-small mb-0 text-center">Recommended size: 1200x600px (JPG, PNG)</p>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4 text-center">
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-2">
+                            <i class="bi bi-plus-circle me-2"></i>Publish Event
+                        </button>
+                        <button type="reset" class="btn btn-link btn-sm text-decoration-none text-muted">Discard Draft</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-control-lg { font-size: 1rem; border-radius: 12px; }
+    .form-control:focus { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
+    .input-group-text { border-radius: 12px 0 0 12px; border: 1px solid #dee2e6; }
+    .image-upload-wrapper { background: #f8fafc; transition: all 0.3s ease; }
+    .image-upload-wrapper:hover { border-color: #6366f1 !important; background: #f1f5f9; }
+    .btn-white { background: #fff; color: #475569; transition: all 0.2s; }
+    .btn-white:hover { background: #f8fafc; transform: translateY(-2px); }
+    .btn-primary { background: #6366f1; border: none; border-radius: 12px; padding: 12px; }
+    .btn-primary:hover { background: #4f46e5; }
+    .border-dashed { border-style: dashed !important; }
+    .x-small { font-size: 0.75rem; }
+</style>
+
+<script>
+document.getElementById('imageInput').addEventListener('change', function(e) {
+    const preview = document.getElementById('preview');
+    const placeholder = document.getElementById('upload-placeholder');
+    const file = e.target.files[0];
+    if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.classList.remove('d-none');
+        placeholder.classList.add('d-none');
+    }
+});
+</script>
+{% endblock %}

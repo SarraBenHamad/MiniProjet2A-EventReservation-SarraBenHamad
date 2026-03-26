@@ -1,0 +1,104 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Dashboard</h2>
+    <span class="text-muted">Welcome, {{ app.user.username }}</span>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary bg-opacity-10 rounded p-3 me-3">
+                        <i class="bi bi-calendar3 text-primary fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Total Events</div>
+                        <div class="fs-3 fw-bold">{{ events|length }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="bg-success bg-opacity-10 rounded p-3 me-3">
+                        <i class="bi bi-ticket-perforated text-success fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Total Reservations</div>
+                        <div class="fs-3 fw-bold">{{ totalReservations }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Events Table -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <h5 class="mb-0">Events</h5>
+        <a href="{{ path('admin_events_new') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> New Event
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Location</th>
+                    <th>Seats</th>
+                    <th>Reservations</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>{{ event.title }}</td>
+                    <td>{{ event.date|date('d/m/Y H:i') }}</td>
+                    <td>{{ event.location }}</td>
+                    <td>{{ event.seats }}</td>
+                    <td>
+                        <a href="{{ path('admin_events_reservations', {id: event.id}) }}"
+                           class="badge bg-info text-decoration-none">
+                            {{ event.reservations|length }} reservations
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{{ path('admin_events_edit', {id: event.id}) }}"
+                           class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form method="post"
+                              action="{{ path('admin_events_delete', {id: event.id}) }}"
+                              class="d-inline"
+                              onsubmit="return confirm('Delete this event?')">
+                            <input type="hidden" name="_token"
+                                   value="{{ csrf_token('delete-event-' ~ event.id) }}">
+                            <button class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">No events yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

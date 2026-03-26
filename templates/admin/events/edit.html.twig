@@ -1,0 +1,139 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Edit Event | {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Edit Event</h2>
+            <p class="text-muted small">Update the information for <span class="text-primary fw-semibold">{{ event.title }}</span></p>
+        </div>
+        <a href="{{ path('admin_events_index') }}" class="btn btn-white shadow-sm border-0 px-3">
+            <i class="bi bi-arrow-left me-2"></i> Cancel Changes
+        </a>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="card-title fw-bold mb-4">
+                            <i class="bi bi-pencil-square text-primary me-2"></i>Event Details
+                        </h5>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Event Title *</label>
+                            <input type="text" name="title" class="form-control form-control-lg" 
+                                   value="{{ event.title }}" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Description *</label>
+                            <textarea name="description" class="form-control" rows="6" required>{{ event.description }}</textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-semibold">Date & Time *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-calendar-check"></i></span>
+                                    <input type="datetime-local" name="date" class="form-control border-start-0" 
+                                           value="{{ event.date|date('Y-m-d\\TH:i') }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-semibold">Total Capacity *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-people"></i></span>
+                                    <input type="number" name="seats" class="form-control border-start-0" 
+                                           value="{{ event.seats }}" min="1" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-0">
+                            <label class="form-label fw-semibold">Location *</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-geo-alt"></i></span>
+                                <input type="text" name="location" class="form-control border-start-0" 
+                                       value="{{ event.location }}" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="card-title fw-bold mb-4">
+                            <i class="bi bi-image text-primary me-2"></i>Event Banner
+                        </h5>
+                        
+                        <div class="current-image-wrapper mb-3 text-center">
+                            {% if event.image %}
+                                <div class="position-relative">
+                                    <img src="/uploads/events/{{ event.image }}" id="preview" class="img-fluid rounded-3 shadow-sm border">
+                                    <span class="badge bg-dark position-absolute top-0 start-0 m-2 opacity-75">Current Image</span>
+                                </div>
+                            {% else %}
+                                <div class="bg-light rounded-4 py-5 border border-dashed" id="placeholder">
+                                    <i class="bi bi-image text-muted display-6"></i>
+                                    <p class="small text-muted mb-0">No image set</p>
+                                </div>
+                                <img id="preview" src="" class="img-fluid rounded-3 d-none shadow-sm border">
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold text-uppercase text-muted">Replace Image</label>
+                            <input type="file" name="image" id="imageInput" class="form-control" accept="image/*">
+                        </div>
+                        <p class="x-small text-muted italic">Leave empty to keep current image</p>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="bi bi-cloud-arrow-up me-2"></i>Save Changes
+                        </button>
+                        <div class="d-flex justify-content-center">
+                            <a href="{{ path('admin_events_index') }}" class="text-decoration-none text-muted small">
+                                Discard edits
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-control-lg { border-radius: 12px; font-size: 1rem; }
+    .form-control:focus { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
+    .input-group-text { border-radius: 12px 0 0 12px; border: 1px solid #dee2e6; }
+    .btn-white { background: #fff; color: #475569; transition: all 0.2s; }
+    .btn-white:hover { background: #f8fafc; transform: translateY(-2px); }
+    .btn-primary { background: #6366f1; border: none; border-radius: 12px; padding: 12px; font-weight: 600; }
+    .btn-primary:hover { background: #4f46e5; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+    .border-dashed { border-style: dashed !important; border-width: 2px !important; }
+    .x-small { font-size: 0.75rem; }
+</style>
+
+<script>
+document.getElementById('imageInput').addEventListener('change', function(e) {
+    const preview = document.getElementById('preview');
+    const placeholder = document.getElementById('placeholder');
+    const file = e.target.files[0];
+    if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.classList.remove('d-none');
+        if(placeholder) placeholder.classList.add('d-none');
+    }
+});
+</script>
+{% endblock %}
